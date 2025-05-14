@@ -15,12 +15,21 @@ import {
   SimpleGrid,
   Flex,
   Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  useDisclosure,
 } from '@chakra-ui/react';
+import { useAuth } from '../context/AuthContext';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { Property } from '../types/property';
 import { loadProperties } from '../services/propertyService';
+import { EditPropertyForm } from './EditPropertyForm';
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('en-US', {
@@ -33,6 +42,8 @@ const formatPrice = (price: number) => {
 export const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -148,7 +159,7 @@ export const PropertyDetail = () => {
               <Heading size="xl">{formatPrice(property.price)}</Heading>
               <Flex gap={2}>
                 <Badge colorScheme="teal" fontSize="md" px={2} py={1}>
-                  {property.status === 'for-sale' ? 'For Sale' : 
+                  {property.status === 'for-sale' ? 'For Sale' :
                    property.status === 'for-rent' ? 'For Rent' : 'Sold'}
                 </Badge>
                 <Badge colorScheme="purple" fontSize="md" px={2} py={1}>
@@ -185,10 +196,35 @@ export const PropertyDetail = () => {
               <Button colorScheme="teal" size="lg">
                 Contact Agent
               </Button>
+              {user?.role === 'admin' && (
+                <Button colorScheme="blue" size="lg" onClick={onOpen}>
+                  Edit Property
+                </Button>
+              )}
             </Stack>
           </Box>
         </GridItem>
       </Grid>
+
+      {/* Edit Property Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent maxW="800px">
+          <ModalHeader>Edit Property</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            {property && (
+              <EditPropertyForm
+                property={property}
+                onPropertyUpdated={() => {
+                  onClose();
+                  window.location.reload();
+                }}
+              />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 };

@@ -24,13 +24,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<LoginForm onSuccess={() => {}} />} />
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <ProtectedRoute>
                   <App />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route
               path="/properties"

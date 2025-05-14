@@ -209,6 +209,22 @@ const savePropertiesToCSV = async (propsToSave: Property[]) => {
   }
 };
 
+export const updateProperty = async (property: Property): Promise<Property> => {
+  const propertyIndex = properties.findIndex(p => p.id === property.id);
+  if (propertyIndex === -1) {
+    throw new Error('Property not found');
+  }
+
+  const updatedProperty = {
+    ...property,
+    updatedAt: new Date().toISOString()
+  };
+
+  properties[propertyIndex] = updatedProperty;
+  await savePropertiesToCSV(properties);
+  return updatedProperty;
+};
+
 export const saveProperty = async (property: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
   const newProperty: Property = {
     ...property,
