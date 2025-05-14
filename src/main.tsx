@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import App from './App'
 import LoginForm from './components/LoginForm';
 import { PropertyList } from './components/PropertyList';
+import { PropertyDetail } from './components/PropertyDetail';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css'
@@ -36,6 +37,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               element={
                 <ProtectedRoute>
                   <PropertyList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/property/:id"
+              element={
+                <ProtectedRoute>
+                  <PropertyDetail />
                 </ProtectedRoute>
               }
             />

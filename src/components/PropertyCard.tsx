@@ -1,4 +1,5 @@
 import { Box, Image, Text, Badge, Stack, Heading, HStack } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import type { Property } from '../types/property';
 
 interface PropertyCardProps {
@@ -14,6 +15,12 @@ const formatPrice = (price: number) => {
 };
 
 export const PropertyCard = ({ property }: PropertyCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/property/${property.id}`);
+  };
+
   return (
     <Box
       maxW="sm"
@@ -22,6 +29,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
       overflow="hidden"
       _hover={{ transform: 'scale(1.02)', transition: 'all 0.2s' }}
       cursor="pointer"
+      onClick={handleClick}
     >
       <Image
         src={property.images[0]}
