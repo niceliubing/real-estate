@@ -57,10 +57,10 @@ export const PropertyDetail = () => {
   // Auto-rotate images
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-    
+
     if (isAutoPlay && property?.images.length > 1) {
       intervalId = setInterval(() => {
-        setSelectedImageIndex((prevIndex) => 
+        setSelectedImageIndex((prevIndex) =>
           prevIndex === property.images.length - 1 ? 0 : prevIndex + 1
         );
       }, 3000);
@@ -132,14 +132,14 @@ export const PropertyDetail = () => {
                 transition="opacity 0.3s"
               />
             </Box>
-            
+
             {/* Slideshow Controls */}
-            <Flex 
-              position="absolute" 
-              bottom="4" 
-              right="4" 
-              bg="blackAlpha.600" 
-              borderRadius="md" 
+            <Flex
+              position="absolute"
+              bottom="4"
+              right="4"
+              bg="blackAlpha.600"
+              borderRadius="md"
               p={2}
             >
               <Button
