@@ -22,7 +22,7 @@ const rowToUser = (row: any): User => ({
   email: String(row.email || ''),
   password: String(row.password || ''),
   name: String(row.name || ''),
-  role: row.role === 'admin' ? 'admin' : 'customer',
+  role: row.role === 'admin' ? 'admin' : 'user',
   createdAt: row.createdAt || new Date().toISOString(),
   updatedAt: row.updatedAt || new Date().toISOString()
 });
@@ -44,19 +44,21 @@ export const loadUsers = async (): Promise<User[]> => {
       throw new Error('Failed to load users');
     }
     const csvData = await response.text();
+    console.log('Loaded CSV data:', csvData); // Debug log
 
     return new Promise((resolve) => {
       Papa.parse<Record<string, any>>(csvData, {
         header: true,
         skipEmptyLines: true,
+        transform: (value) => value.trim(),
         complete: (results) => {
           if (!results.data || !Array.isArray(results.data) || results.data.length === 0) {
             // Initialize with default admin user if no users exist
             const defaultAdmin: User = {
               id: '1',
               email: 'admin@example.com',
-              password: 'admin123', // In a real app, this should be hashed
-              name: 'Admin',
+              password: '123', // In a real app, this should be hashed
+              name: 'Admin User',
               role: 'admin',
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
@@ -68,6 +70,7 @@ export const loadUsers = async (): Promise<User[]> => {
           }
 
           users = results.data.map(rowToUser);
+          console.log('Parsed users:', users); // Debug log
           resolve(users);
         },
         error: (error) => {
@@ -132,7 +135,7 @@ export const register = async (data: RegisterData): Promise<User> => {
     email: data.email,
     password: data.password,
     name: data.name,
-    role: 'customer', // New users are always customers
+    role: 'user', // New users are always regular users
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };

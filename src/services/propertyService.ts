@@ -124,11 +124,24 @@ const generateUniqueId = (existingProperties: Property[]): string => {
 
 export const loadProperties = async (): Promise<Property[]> => {
   try {
-    const response = await fetch('/api/properties');
+    const response = await fetch('/api/properties', {
+      headers: {
+        'Accept': 'text/csv',
+        'Cache-Control': 'no-cache'
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to load properties');
     }
     const csvData = await response.text();
+
+    // Check if the response is HTML instead of CSV
+    if (csvData.trim().toLowerCase().startsWith('<!doctype html>')) {
+      console.log('Received HTML instead of CSV, using default properties');
+      properties = [...defaultProperties];
+      await savePropertiesToCSV(properties);
+      return properties;
+    }
 
     return new Promise((resolve) => {
       Papa.parse<Record<string, any>>(csvData, {

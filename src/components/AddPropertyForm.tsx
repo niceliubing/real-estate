@@ -1,13 +1,36 @@
+import {
+  Box,
+  Button,
+  Input,
+  Textarea,
+  Select,
+  FormControl,
+  FormLabel,
+  useToast,
+  SimpleGrid,
+  Image,
+} from '@chakra-ui/react';
 import { useState, useRef } from 'react';
-import { Box } from '@chakra-ui/react';
-import { Button } from '@chakra-ui/button';
-import { Input } from '@chakra-ui/input';
-import { Textarea } from '@chakra-ui/textarea';
-import { Select } from '@chakra-ui/select';
-import { FormControl, FormLabel } from '@chakra-ui/form-control';
-import { useToast } from '@chakra-ui/toast';
 import type { Property } from '../types/property';
 import { saveProperty } from '../services/propertyService';
+import { uploadImage } from '../services/imageService';
+
+interface FormElements extends HTMLFormControlsCollection {
+  title: HTMLInputElement;
+  address: HTMLInputElement;
+  price: HTMLInputElement;
+  bedrooms: HTMLInputElement;
+  bathrooms: HTMLInputElement;
+  squareFeet: HTMLInputElement;
+  description: HTMLTextAreaElement;
+  features: HTMLInputElement;
+  type: HTMLSelectElement;
+  status: HTMLSelectElement;
+}
+
+interface PropertyFormElement extends HTMLFormElement {
+  readonly elements: FormElements;
+}
 
 interface AddPropertyFormProps {
   onPropertyAdded?: () => void;
@@ -16,78 +39,94 @@ interface AddPropertyFormProps {
 export const AddPropertyForm = ({ onPropertyAdded }: AddPropertyFormProps) => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const formRef = useRef<PropertyFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedImages((prevImages) => [...prevImages, ...files]);
+
+    // Create preview URLs
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prevUrls) => [...prevUrls, ...newPreviewUrls]);
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages((prevImages: File[]) => prevImages.filter((_, i) => i !== index));
+    setPreviewUrls((prevUrls: string[]) => {
+      const newUrls = prevUrls.filter((_, i) => i !== index);
+      URL.revokeObjectURL(prevUrls[index]); // Clean up the URL
+      return newUrls;
+    });
+  };
 
   const resetForm = () => {
     if (formRef.current) {
       formRef.current.reset();
       // Reset all form fields to their default values
       const inputs = formRef.current.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input, textarea, select');
-      inputs.forEach(input => {
+      inputs.forEach((input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
         input.value = '';
       });
     }
+
+    // Clear image previews and selected images
+    previewUrls.forEach((url: string) => URL.revokeObjectURL(url));
+    setPreviewUrls([]);
+    setSelectedImages([]);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<PropertyFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
+      if (selectedImages.length === 0) {
+        throw new Error('Please select at least one image');
+      }
 
-      // Get form values with validation
-      const title = formData.get('title')?.toString() || '';
-      const address = formData.get('address')?.toString() || '';
-      const price = formData.get('price')?.toString() || '';
-      const bedrooms = formData.get('bedrooms')?.toString() || '';
-      const bathrooms = formData.get('bathrooms')?.toString() || '';
-      const squareFeet = formData.get('squareFeet')?.toString() || '';
-      const description = formData.get('description')?.toString() || '';
-      const images = formData.get('images')?.toString() || '';
-      const features = formData.get('features')?.toString() || '';
-      const type = formData.get('type')?.toString() || '';
-      const status = formData.get('status')?.toString() || '';
+      const form = e.currentTarget;
+      const elements = form.elements;
+
+      // Get form values
+      const title = elements.title.value;
+      const address = elements.address.value;
+      const price = elements.price.value;
+      const bedrooms = elements.bedrooms.value;
+      const bathrooms = elements.bathrooms.value;
+      const squareFeet = elements.squareFeet.value;
+      const description = elements.description.value;
+      const features = elements.features.value;
+      const type = elements.type.value as Property['type'];
+      const status = elements.status.value as Property['status'];
 
       // Validate required fields
       if (!title || !address || !price || !bedrooms || !bathrooms ||
-          !squareFeet || !description || !images || !features || !type || !status) {
+          !squareFeet || !description || !features || !type || !status) {
         throw new Error('All fields are required');
       }
 
-      // Parse numeric values
+      // Validate numeric fields
       const priceNum = Number(price);
       const bedroomsNum = Number(bedrooms);
       const bathroomsNum = Number(bathrooms);
       const squareFeetNum = Number(squareFeet);
 
-      // Validate numeric fields
       if (isNaN(priceNum) || isNaN(bedroomsNum) ||
           isNaN(bathroomsNum) || isNaN(squareFeetNum)) {
         throw new Error('Invalid numeric values');
       }
 
-      // Parse arrays
-      const imageList = images.split('|')
-        .map(url => url.trim())
-        .filter(url => url.length > 0);
-      const featureList = features.split('|')
-        .map(feature => feature.trim())
-        .filter(feature => feature.length > 0);
+      // Upload images first
+      const uploadedImageUrls = await Promise.all(
+        selectedImages.map((file: File) => uploadImage(file))
+      );
 
-      // Validate arrays
-      if (imageList.length === 0 || featureList.length === 0) {
-        throw new Error('Images and features cannot be empty');
-      }
-
-      // Validate property type
-      if (!['house', 'condo', 'townhouse', 'apartment'].includes(type)) {
-        throw new Error('Invalid property type');
-      }
-
-      // Validate status
-      if (!['for-sale', 'for-rent', 'sold'].includes(status)) {
-        throw new Error('Invalid property status');
+      // Make sure we have the image URLs
+      if (uploadedImageUrls.length === 0) {
+        throw new Error('Failed to upload images');
       }
 
       const newProperty: Omit<Property, 'id' | 'createdAt' | 'updatedAt'> = {
@@ -98,10 +137,12 @@ export const AddPropertyForm = ({ onPropertyAdded }: AddPropertyFormProps) => {
         bathrooms: bathroomsNum,
         squareFeet: squareFeetNum,
         description,
-        images: imageList,
-        features: featureList,
-        type: type as Property['type'],
-        status: status as Property['status']
+        images: uploadedImageUrls, // Use the uploaded image URLs
+        features: features.split(',')
+          .map((f) => f.trim())
+          .filter((f) => f.length > 0),
+        type,
+        status
       };
 
       await saveProperty(newProperty);
@@ -137,6 +178,53 @@ export const AddPropertyForm = ({ onPropertyAdded }: AddPropertyFormProps) => {
     <form ref={formRef} onSubmit={handleSubmit}>
       <Box p={6} borderWidth="1px" borderRadius="lg" bg="white">
         <Box display="flex" flexDirection="column" gap={4}>
+          {/* Image Upload Section */}
+          <FormControl isRequired>
+            <FormLabel>Property Images</FormLabel>
+            <Input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              hidden
+              ref={fileInputRef}
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              colorScheme="blue"
+              mb={4}
+            >
+              Select Images
+            </Button>
+
+            {/* Image Previews */}
+            {previewUrls.length > 0 && (
+              <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={4} mb={4}>
+                {previewUrls.map((url, index) => (
+                  <Box key={index} position="relative">
+                    <Image
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      boxSize="150px"
+                      objectFit="cover"
+                      borderRadius="md"
+                    />
+                    <Button
+                      size="sm"
+                      position="absolute"
+                      top={2}
+                      right={2}
+                      colorScheme="red"
+                      onClick={() => removeImage(index)}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                ))}
+              </SimpleGrid>
+            )}
+          </FormControl>
+
           <FormControl isRequired>
             <FormLabel>Title</FormLabel>
             <Input name="title" placeholder="Enter property title" />
@@ -193,13 +281,8 @@ export const AddPropertyForm = ({ onPropertyAdded }: AddPropertyFormProps) => {
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Images (pipe-separated URLs)</FormLabel>
-            <Input name="images" placeholder="Enter image URLs, separated by | character" />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Features (pipe-separated)</FormLabel>
-            <Input name="features" placeholder="Enter features, separated by | character" />
+            <FormLabel>Features (comma-separated)</FormLabel>
+            <Input name="features" placeholder="Enter features, separated by commas" />
           </FormControl>
 
           <FormControl isRequired>

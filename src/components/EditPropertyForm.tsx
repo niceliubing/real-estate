@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Button,
@@ -9,10 +9,16 @@ import {
   FormLabel,
   VStack,
   useToast,
+  Image,
+  HStack,
+  IconButton,
+  Text,
 } from '@chakra-ui/react';
+import { DeleteIcon, AddIcon } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
 import type { Property } from '../types/property';
 import { updateProperty } from '../services/propertyService';
+import { uploadImage } from '../services/imageService';
 
 interface EditPropertyFormProps {
   property: Property;
@@ -20,10 +26,17 @@ interface EditPropertyFormProps {
 }
 
 export const EditPropertyForm = ({ property, onPropertyUpdated }: EditPropertyFormProps) => {
-  const [formData, setFormData] = useState(property);
+  const [formData, setFormData] = useState<Property>(property);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const navigate = useNavigate();
+
+  // Ensure formData stays synced with property prop
+  useEffect(() => {
+    setFormData(property);
+  }, [property]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -31,16 +44,64 @@ export const EditPropertyForm = ({ property, onPropertyUpdated }: EditPropertyFo
 
     // Handle numeric fields
     if (['price', 'bedrooms', 'bathrooms', 'squareFeet'].includes(name)) {
-      processedValue = Number(value);
+      processedValue = parseFloat(value) || 0;
     }
-    // Handle arrays
-    else if (['images', 'features'].includes(name)) {
-      processedValue = value.split('|').map(item => item.trim()).filter(Boolean);
+    // Handle features array
+    else if (name === 'features') {
+      processedValue = value.split(',').map(item => item.trim()).filter(Boolean);
     }
 
     setFormData(prev => ({
       ...prev,
       [name]: processedValue,
+    }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadingImage(true);
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const imageUrl = await uploadImage(file);
+        return imageUrl;
+      });
+
+      const newImageUrls = await Promise.all(uploadPromises);
+
+      setFormData(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...newImageUrls]
+      }));
+
+      toast({
+        title: 'Images uploaded',
+        description: 'Images have been successfully uploaded.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to upload images',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleImageRemove = (urlToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter(url => url !== urlToRemove)
     }));
   };
 
@@ -144,21 +205,54 @@ export const EditPropertyForm = ({ property, onPropertyUpdated }: EditPropertyFo
           />
         </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Images (pipe-separated URLs)</FormLabel>
-          <Input
-            name="images"
-            value={formData.images.join(' | ')}
-            onChange={handleChange}
+        <FormControl>
+          <FormLabel>Images</FormLabel>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            ref={fileInputRef}
+            style={{ display: 'none' }}
           />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            isLoading={uploadingImage}
+            leftIcon={<AddIcon />}
+            mb={4}
+          >
+            Add Images
+          </Button>
+
+          <Box maxH="300px" overflowY="auto">
+            {formData.images?.map((imageUrl, index) => (
+              <HStack key={index} mb={2}>
+                <Image
+                  src={imageUrl}
+                  alt={`Property image ${index + 1}`}
+                  boxSize="100px"
+                  objectFit="cover"
+                  borderRadius="md"
+                />
+                <IconButton
+                  aria-label="Remove image"
+                  icon={<DeleteIcon />}
+                  onClick={() => handleImageRemove(imageUrl)}
+                  colorScheme="red"
+                  size="sm"
+                />
+              </HStack>
+            ))}
+          </Box>
         </FormControl>
 
-        <FormControl isRequired>
-          <FormLabel>Features (pipe-separated)</FormLabel>
+        <FormControl>
+          <FormLabel>Features (comma-separated)</FormLabel>
           <Input
             name="features"
-            value={formData.features.join(' | ')}
+            value={formData.features?.join(', ') || ''}
             onChange={handleChange}
+            placeholder="e.g. Garage, Pool, Garden"
           />
         </FormControl>
 
@@ -166,13 +260,14 @@ export const EditPropertyForm = ({ property, onPropertyUpdated }: EditPropertyFo
           <FormLabel>Type</FormLabel>
           <Select
             name="type"
-            value={formData.type}
+            value={formData.type || ''}
             onChange={handleChange}
           >
+            <option value="">Select Type</option>
             <option value="house">House</option>
+            <option value="apartment">Apartment</option>
             <option value="condo">Condo</option>
             <option value="townhouse">Townhouse</option>
-            <option value="apartment">Apartment</option>
           </Select>
         </FormControl>
 
@@ -180,9 +275,10 @@ export const EditPropertyForm = ({ property, onPropertyUpdated }: EditPropertyFo
           <FormLabel>Status</FormLabel>
           <Select
             name="status"
-            value={formData.status}
+            value={formData.status || ''}
             onChange={handleChange}
           >
+            <option value="">Select Status</option>
             <option value="for-sale">For Sale</option>
             <option value="for-rent">For Rent</option>
             <option value="sold">Sold</option>
@@ -192,8 +288,8 @@ export const EditPropertyForm = ({ property, onPropertyUpdated }: EditPropertyFo
         <Button
           type="submit"
           colorScheme="teal"
-          width="full"
           isLoading={isLoading}
+          width="full"
         >
           Update Property
         </Button>

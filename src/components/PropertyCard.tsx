@@ -1,4 +1,4 @@
-import { Box, Image, Text, Badge, Stack, Heading, HStack } from '@chakra-ui/react';
+import { Box, Image, Text, Badge, Heading, HStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import type { Property } from '../types/property';
 
@@ -21,6 +21,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
     navigate(`/property/${property.id}`);
   };
 
+  console.log('PropertyCard', property);
   return (
     <Box
       maxW="sm"
@@ -32,7 +33,9 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
       onClick={handleClick}
     >
       <Image
-        src={property.images[0]}
+        src={property.images[0].startsWith('http')
+          ? property.images[0]
+          : `/uploads/properties/${property.images[0].split('properties/').pop()}`}
         alt={property.title}
         height="200px"
         width="100%"
@@ -67,11 +70,11 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
           <Text fontSize="sm">{property.squareFeet.toLocaleString()} sqft</Text>
         </HStack>
 
-        <Stack mt="4">
+        <Box mt="4">
           <Text color="gray.600" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
             {property.description}
           </Text>
-        </Stack>
+        </Box>
       </Box>
     </Box>
   );

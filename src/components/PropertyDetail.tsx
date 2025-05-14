@@ -124,7 +124,9 @@ export const PropertyDetail = () => {
           <Box position="relative">
             <Box borderRadius="lg" overflow="hidden" mb={6}>
               <Image
-                src={property.images[selectedImageIndex]}
+                src={property.images[selectedImageIndex].startsWith('http')
+                  ? property.images[selectedImageIndex]
+                  : `/uploads/properties/${property.images[selectedImageIndex].split('/').pop()}`}
                 alt={`${property.title} - Image ${selectedImageIndex + 1}`}
                 width="100%"
                 height="500px"
@@ -172,7 +174,7 @@ export const PropertyDetail = () => {
                 borderColor="teal.500"
               >
                 <Image
-                  src={image}
+                  src={image.startsWith('http') ? image : `/uploads/properties/${image.split('/').pop()}`}
                   alt={`${property.title} - Image ${index + 1}`}
                   width="100%"
                   height="100px"
