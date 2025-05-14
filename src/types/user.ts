@@ -1,13 +1,8 @@
-export type UserRole = 'admin' | 'customer';
+export type UserRole = 'admin' | 'user';
 
 export interface User {
-  id: string;
   email: string;
-  password: string; // In a real app, this should be hashed
-  name: string;
   role: UserRole;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface LoginCredentials {
@@ -15,6 +10,11 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface RegisterData extends Omit<User, 'id' | 'role' | 'createdAt' | 'updatedAt'> {
+export interface RegisterData {
+  email: string;
+  password: string;
   confirmPassword: string;
 }
+
+// Re-export for better compatibility
+export type { User as default };

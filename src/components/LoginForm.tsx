@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -9,6 +10,7 @@ import {
   useToast,
   Heading,
 } from '@chakra-ui/react';
+import { useAuth } from '../context/AuthContext';
 import { login } from '../services/userService';
 import type { LoginCredentials } from '../types/user';
 
@@ -19,6 +21,9 @@ interface LoginFormProps {
 const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
+  const navigate = useNavigate();
+
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,7 +36,8 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
         password: formData.get('password')?.toString() || ''
       };
 
-      await login(credentials);
+      const user = await login(credentials);
+      setUser(user);
 
       toast({
         title: 'Login successful',
@@ -41,6 +47,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       });
 
       onSuccess();
+      navigate('/properties');
     } catch (error) {
       toast({
         title: 'Login failed',

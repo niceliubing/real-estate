@@ -4,6 +4,9 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import App from './App'
 import LoginForm from './components/LoginForm';
+import { PropertyList } from './components/PropertyList';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import './index.css'
 
 const theme = extendTheme({
@@ -17,10 +20,27 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
       <Router>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/login" element={<LoginForm onSuccess={() => console.log('Logged in!')} />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginForm onSuccess={() => {}} />} />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <App />
+                </ProtectedRoute>
+              } 
+            />
+            <Route
+              path="/properties"
+              element={
+                <ProtectedRoute>
+                  <PropertyList />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </Router>
     </ChakraProvider>
   </React.StrictMode>,
