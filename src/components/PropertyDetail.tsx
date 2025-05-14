@@ -29,6 +29,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { Property } from '../types/property';
 import { loadProperties } from '../services/propertyService';
+import { loadReviews, getAverageRating } from '../services/reviewService';
+import type { Review } from '../types/review';
+import { ReviewForm } from './ReviewForm';
+import { ReviewList } from './ReviewList';
 import { EditPropertyForm } from './EditPropertyForm';
 
 const formatPrice = (price: number) => {
@@ -46,21 +50,47 @@ export const PropertyDetail = () => {
   const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+
+  // Auto-rotate images
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    
+    if (isAutoPlay && property?.images.length > 1) {
+      intervalId = setInterval(() => {
+        setSelectedImageIndex((prevIndex) => 
+          prevIndex === property.images.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 3000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isAutoPlay, property?.images.length]);
 
   useEffect(() => {
-    const fetchProperty = async () => {
+    const fetchData = async () => {
       try {
-        const properties = await loadProperties();
+        const [properties, propertyReviews] = await Promise.all([
+          loadProperties(),
+          loadReviews(id)
+        ]);
         const foundProperty = properties.find(p => p.id === id);
         setProperty(foundProperty || null);
+        setReviews(propertyReviews);
       } catch (error) {
-        console.error('Error loading property:', error);
+        console.error('Error loading data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProperty();
+    fetchData();
   }, [id]);
 
   if (isLoading) {
@@ -91,38 +121,69 @@ export const PropertyDetail = () => {
       <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
         <GridItem>
           {/* Main Image Gallery */}
-          <Box borderRadius="lg" overflow="hidden" mb={6}>
-            <Image
-              src={property.images[0]}
-              alt={property.title}
-              width="100%"
-              height="500px"
-              objectFit="cover"
-            />
+          <Box position="relative">
+            <Box borderRadius="lg" overflow="hidden" mb={6}>
+              <Image
+                src={property.images[selectedImageIndex]}
+                alt={`${property.title} - Image ${selectedImageIndex + 1}`}
+                width="100%"
+                height="500px"
+                objectFit="cover"
+                transition="opacity 0.3s"
+              />
+            </Box>
+            
+            {/* Slideshow Controls */}
+            <Flex 
+              position="absolute" 
+              bottom="4" 
+              right="4" 
+              bg="blackAlpha.600" 
+              borderRadius="md" 
+              p={2}
+            >
+              <Button
+                size="sm"
+                onClick={() => setIsAutoPlay(!isAutoPlay)}
+                variant="ghost"
+                color="white"
+                _hover={{ bg: 'blackAlpha.700' }}
+              >
+                {isAutoPlay ? 'Pause' : 'Play'} Slideshow
+              </Button>
+            </Flex>
           </Box>
 
-          {/* Additional Images */}
-          {property.images.length > 1 && (
-            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} mb={6}>
-              {property.images.slice(1).map((image, index) => (
-                <Box
-                  key={index}
-                  borderRadius="lg"
-                  overflow="hidden"
-                  cursor="pointer"
-                  _hover={{ opacity: 0.8 }}
-                >
-                  <Image
-                    src={image}
-                    alt={`${property.title} - Image ${index + 2}`}
-                    width="100%"
-                    height="100px"
-                    objectFit="cover"
-                  />
-                </Box>
-              ))}
-            </SimpleGrid>
-          )}
+          {/* Image Thumbnails */}
+          <SimpleGrid columns={{ base: 3, md: 5 }} spacing={4} mb={6}>
+            {property.images.map((image, index) => (
+              <Box
+                key={index}
+                borderRadius="lg"
+                overflow="hidden"
+                cursor="pointer"
+                _hover={{ opacity: 0.8 }}
+                onClick={() => {
+                  setSelectedImageIndex(index);
+                  setIsAutoPlay(false);
+                }}
+                position="relative"
+                borderWidth={selectedImageIndex === index ? "2px" : "0px"}
+                borderColor="teal.500"
+              >
+                <Image
+                  src={image}
+                  alt={`${property.title} - Image ${index + 1}`}
+                  width="100%"
+                  height="100px"
+                  objectFit="cover"
+                  opacity={selectedImageIndex === index ? 1 : 0.8}
+                  transition="opacity 0.2s"
+                  _hover={{ opacity: 1 }}
+                />
+              </Box>
+            ))}
+          </SimpleGrid>
 
           {/* Property Description */}
           <Box mt={6}>
@@ -205,6 +266,34 @@ export const PropertyDetail = () => {
           </Box>
         </GridItem>
       </Grid>
+
+      {/* Reviews Section */}
+      <Box mt={12}>
+        <Heading size="lg" mb={6}>Reviews</Heading>
+        <Stack spacing={6}>
+          {reviews.length > 0 ? (
+            <Box>
+              <Heading size="md" mb={4}>
+                Property Reviews ({reviews.length})
+                <Badge ml={2} colorScheme="teal">
+                  {getAverageRating(property.id).toFixed(1)} / 5
+                </Badge>
+              </Heading>
+              <ReviewList reviews={reviews} />
+            </Box>
+          ) : (
+            <Text color="gray.500">No reviews yet. Be the first to review this property!</Text>
+          )}
+
+          <Box mt={6}>
+            <Heading size="md" mb={4}>Submit a Review</Heading>
+            <ReviewForm
+              propertyId={property.id}
+              onReviewAdded={() => loadReviews(id).then(setReviews)}
+            />
+          </Box>
+        </Stack>
+      </Box>
 
       {/* Edit Property Modal */}
       <Modal isOpen={isOpen} onClose={onClose} size="xl">

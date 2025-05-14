@@ -1,0 +1,2 @@
+propertyId,userId,userEmail,rating,comment,id,createdAt,updatedAt
+3,user@example.com,user@example.com,5,thank you Kevin,1,2025-05-14T17:15:49.797Z,2025-05-14T17:15:49.797Z
