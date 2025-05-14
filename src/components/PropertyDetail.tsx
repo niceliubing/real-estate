@@ -46,7 +46,16 @@ const formatPrice = (price: number) => {
 export const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose
+  } = useDisclosure();
+  const {
+    isOpen: isContactOpen,
+    onOpen: onContactOpen,
+    onClose: onContactClose
+  } = useDisclosure();
   const { user } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -256,11 +265,11 @@ export const PropertyDetail = () => {
 
               <Divider />
 
-              <Button colorScheme="teal" size="lg">
+              <Button colorScheme="teal" size="lg" onClick={onContactOpen}>
                 Contact Agent
               </Button>
               {user?.role === 'admin' && (
-                <Button colorScheme="blue" size="lg" onClick={onOpen}>
+                <Button colorScheme="blue" size="lg" onClick={onEditOpen}>
                   Edit Property
                 </Button>
               )}
@@ -298,7 +307,7 @@ export const PropertyDetail = () => {
       </Box>
 
       {/* Edit Property Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="xl">
         <ModalOverlay />
         <ModalContent maxW="800px">
           <ModalHeader>Edit Property</ModalHeader>
@@ -308,11 +317,35 @@ export const PropertyDetail = () => {
               <EditPropertyForm
                 property={property}
                 onPropertyUpdated={() => {
-                  onClose();
+                  onEditClose();
                   window.location.reload();
                 }}
               />
             )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {/* Contact Agent Modal */}
+      <Modal isOpen={isContactOpen} onClose={onContactClose} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Agent Contact Information</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Stack spacing={4}>
+              <Box>
+                <Text fontWeight="bold" mb={2}>Email:</Text>
+                <Text>agent@test.com</Text>
+              </Box>
+              <Box>
+                <Text fontWeight="bold" mb={2}>Phone:</Text>
+                <Text>1-888-888-8888</Text>
+              </Box>
+              <Text fontSize="sm" color="gray.600" mt={4}>
+                Our agent will respond to your inquiry within 24 hours.
+              </Text>
+            </Stack>
           </ModalBody>
         </ModalContent>
       </Modal>
