@@ -5,6 +5,7 @@ import path from 'path'
 import type { Plugin } from 'vite'
 
 const CSV_FILE_PATH = path.join(process.cwd(), 'src/data/properties.csv')
+const USERS_CSV_FILE_PATH = path.join(process.cwd(), 'src/data/users.csv')
 
 // Ensure the data directory exists
 const ensureDataDirectory = async () => {
@@ -16,16 +17,11 @@ const ensureDataDirectory = async () => {
   }
 }
 
-// Create a custom plugin to handle property data
-const propertyDataPlugin = (): Plugin => ({
-  name: 'property-data',
+// Create a custom plugin to handle property and user data
+const dataPlugin = (): Plugin => ({
+  name: 'data-plugin',
   configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
-      // Only handle /api/properties requests
-      if (!req.url?.startsWith('/api/properties')) {
-        return next()
-      }
-
       // Set CORS headers
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST')
@@ -37,60 +33,110 @@ const propertyDataPlugin = (): Plugin => ({
         return
       }
 
-      try {
-        await ensureDataDirectory()
+      // Handle properties endpoint
+      if (req.url?.startsWith('/api/properties')) {
+        try {
+          await ensureDataDirectory()
 
-        if (req.method === 'GET') {
-          try {
-            const data = await fs.readFile(CSV_FILE_PATH, 'utf-8')
-            res.setHeader('Content-Type', 'text/csv')
-            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-            res.statusCode = 200
-            res.end(data)
-          } catch (error) {
-            if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-              // If file doesn't exist, return empty CSV with headers
-              res.setHeader('Content-Type', 'text/csv')
-              res.statusCode = 200
-              res.end('id,title,address,price,bedrooms,bathrooms,squareFeet,description,images,features,type,status,createdAt,updatedAt\n')
-            } else {
-              res.statusCode = 500
-              res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify({ error: 'Failed to read properties' }))
-            }
-          }
-        } else if (req.method === 'POST') {
-          let body = ''
-          req.on('data', chunk => {
-            body += chunk.toString()
-          })
-          req.on('end', async () => {
+          if (req.method === 'GET') {
             try {
-              await fs.writeFile(CSV_FILE_PATH, body, 'utf-8')
+              const data = await fs.readFile(CSV_FILE_PATH, 'utf-8')
+              res.setHeader('Content-Type', 'text/csv')
+              res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
               res.statusCode = 200
-              res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify({ success: true }))
+              res.end(data)
             } catch (error) {
-              res.statusCode = 500
-              res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify({ error: 'Failed to save properties' }))
+              if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+                res.setHeader('Content-Type', 'text/csv')
+                res.statusCode = 200
+                res.end('id,title,address,price,bedrooms,bathrooms,squareFeet,description,images,features,type,status,createdAt,updatedAt\n')
+              } else {
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: 'Failed to read properties' }))
+              }
             }
-          })
-        } else {
-          res.statusCode = 405
+          } else if (req.method === 'POST') {
+            let body = ''
+            req.on('data', chunk => {
+              body += chunk.toString()
+            })
+            req.on('end', async () => {
+              try {
+                await fs.writeFile(CSV_FILE_PATH, body, 'utf-8')
+                res.statusCode = 200
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ success: true }))
+              } catch (error) {
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: 'Failed to save properties' }))
+              }
+            })
+          }
+        } catch (error) {
+          res.statusCode = 500
           res.setHeader('Content-Type', 'application/json')
-          res.end(JSON.stringify({ error: 'Method not allowed' }))
+          res.end(JSON.stringify({ error: 'Server error' }))
         }
-      } catch (error) {
-        res.statusCode = 500
-        res.setHeader('Content-Type', 'application/json')
-        res.end(JSON.stringify({ error: 'Server error' }))
+        return
       }
+
+      // Handle users endpoint
+      if (req.url?.startsWith('/api/users')) {
+        try {
+          await ensureDataDirectory()
+
+          if (req.method === 'GET') {
+            try {
+              const data = await fs.readFile(USERS_CSV_FILE_PATH, 'utf-8')
+              res.setHeader('Content-Type', 'text/csv')
+              res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+              res.statusCode = 200
+              res.end(data)
+            } catch (error) {
+              if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+                res.setHeader('Content-Type', 'text/csv')
+                res.statusCode = 200
+                res.end('id,email,password,name,role,createdAt,updatedAt\n')
+              } else {
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: 'Failed to read users' }))
+              }
+            }
+          } else if (req.method === 'POST') {
+            let body = ''
+            req.on('data', chunk => {
+              body += chunk.toString()
+            })
+            req.on('end', async () => {
+              try {
+                await fs.writeFile(USERS_CSV_FILE_PATH, body, 'utf-8')
+                res.statusCode = 200
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ success: true }))
+              } catch (error) {
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: 'Failed to save users' }))
+              }
+            })
+          }
+        } catch (error) {
+          res.statusCode = 500
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ error: 'Server error' }))
+        }
+        return
+      }
+
+      next()
     })
   }
 })
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), propertyDataPlugin()]
+  plugins: [react(), dataPlugin()]
 })
