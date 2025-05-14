@@ -4,12 +4,14 @@ import { PropertyCard } from './PropertyCard';
 import { AddPropertyForm } from './AddPropertyForm';
 import { loadProperties } from '../services/propertyService';
 import type { Property } from '../types/property';
+import { useAuth } from '../context/AuthContext';
 
 export const PropertyList = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const toast = useToast();
+  const { user } = useAuth();
 
   const fetchProperties = async () => {
     try {
@@ -62,12 +64,14 @@ export const PropertyList = () => {
       <Box display="flex" flexDirection="column" gap={8}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Heading>Featured Properties ({properties.length})</Heading>
-          <Button colorScheme="teal" onClick={handleAddProperty}>
-            {showAddForm ? 'Hide Form' : 'Add New Property'}
-          </Button>
+          {user?.role === 'admin' && (
+            <Button colorScheme="teal" onClick={handleAddProperty}>
+              {showAddForm ? 'Hide Form' : 'Add New Property'}
+            </Button>
+          )}
         </Box>
 
-        {showAddForm && (
+        {showAddForm && user?.role === 'admin' && (
           <AddPropertyForm onPropertyAdded={handlePropertyAdded} />
         )}
 
