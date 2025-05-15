@@ -23,6 +23,7 @@ import {
   ModalBody,
   useDisclosure,
 } from '@chakra-ui/react';
+import agentImage from '../assets/agent.JPG';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -265,8 +266,37 @@ export const PropertyDetail = () => {
 
               <Divider />
 
-              <Button colorScheme="teal" size="lg" onClick={onContactOpen}>
-                Contact Agent
+              <Button
+                colorScheme="teal"
+                size="lg"
+                onClick={onContactOpen}
+                display="flex"
+                alignItems="center"
+                gap={2}
+                px={6}
+                py={6}
+                position="relative"
+                pl={16}
+              >
+                <Box
+                  position="absolute"
+                  left={4}
+                  borderRadius="full"
+                  overflow="hidden"
+                  width="32px"
+                  height="32px"
+                  flexShrink={0}
+                  border="2px solid white"
+                >
+                  <Image
+                    src={agentImage}
+                    alt="Agent"
+                    width="100%"
+                    height="100%"
+                    objectFit="cover"
+                  />
+                </Box>
+                <Text fontSize="lg">Contact Agent</Text>
               </Button>
               {user?.role === 'admin' && (
                 <Button colorScheme="blue" size="lg" onClick={onEditOpen}>
@@ -334,13 +364,58 @@ export const PropertyDetail = () => {
           <ModalCloseButton />
           <ModalBody pb={6}>
             <Stack spacing={4}>
+              <Flex alignItems="center" gap={4}>
+                <Box
+                  position="relative"
+                  width="80px"
+                  height="80px"
+                  flexShrink={0}
+                >
+                  <Box
+                    position="absolute"
+                    top="-2px"
+                    right="-2px"
+                    bg="yellow.400"
+                    color="white"
+                    fontSize="sm"
+                    fontWeight="bold"
+                    px={2}
+                    borderRadius="md"
+                    zIndex={1}
+                    transform="rotate(20deg)"
+                    boxShadow="lg"
+                  >
+                    #1
+                  </Box>
+                  <Box
+                    borderRadius="full"
+                    overflow="hidden"
+                    border="3px solid"
+                    borderColor="teal.500"
+                    height="100%"
+                    width="100%"
+                  >
+                    <Image
+                      src={agentImage}
+                      alt="Agent"
+                      width="100%"
+                      height="100%"
+                      objectFit="cover"
+                    />
+                  </Box>
+                </Box>
+                <Box>
+                  <Text fontSize="xl" fontWeight="bold" mb={1}>Kevin Zhang</Text>
+                  <Text color="gray.600">Real One Realty Agent</Text>
+                </Box>
+              </Flex>
               <Box>
                 <Text fontWeight="bold" mb={2}>Email:</Text>
-                <Text>agent@test.com</Text>
+                <Text>kevinzhangteam@gmail.com</Text>
               </Box>
               <Box>
                 <Text fontWeight="bold" mb={2}>Phone:</Text>
-                <Text>1-888-888-8888</Text>
+                <Text>647-866-9188</Text>
               </Box>
               <Text fontSize="sm" color="gray.600" mt={4}>
                 Our agent will respond to your inquiry within 24 hours.
