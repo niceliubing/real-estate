@@ -62,40 +62,62 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   };
 
   return (
-    <Box p={8} maxWidth="400px" borderWidth={1} borderRadius={8} boxShadow="lg">
-      <VStack spacing={4} align="stretch">
-        <Heading size="lg" textAlign="center">Login</Heading>
-        <form onSubmit={handleSubmit}>
-          <VStack spacing={4}>
-            <FormControl isRequired>
-              <FormLabel>Email</FormLabel>
-              <Input
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-              />
-            </FormControl>
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="flex-start"
+      justifyContent="center"
+      bg="gray.50"
+      w="100%"
+      position="fixed"
+      top="0"
+      left="0"
+      pt="120px"
+    >
+      <Box
+        p={8}
+        maxWidth="400px"
+        width="90%"
+        borderWidth={1}
+        borderRadius={8}
+        boxShadow="lg"
+        bg="white"
+        mx="auto"
+      >
+        <VStack spacing={4} align="stretch">
+          <Heading size="lg" textAlign="center">Login</Heading>
+          <form onSubmit={handleSubmit}>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                />
+              </FormControl>
 
-            <FormControl isRequired>
-              <FormLabel>Password</FormLabel>
-              <Input
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                />
+              </FormControl>
 
-            <Button
-              type="submit"
-              colorScheme="teal"
-              width="full"
-              isLoading={isLoading}
-            >
-              Login
-            </Button>
-          </VStack>
-        </form>
-      </VStack>
+              <Button
+                type="submit"
+                colorScheme="teal"
+                width="full"
+                isLoading={isLoading}
+              >
+                Login
+              </Button>
+            </VStack>
+          </form>
+        </VStack>
+      </Box>
     </Box>
   );
 };
