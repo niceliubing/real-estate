@@ -6,6 +6,7 @@ import App from './App'
 import LoginForm from './components/LoginForm';
 import { PropertyList } from './components/PropertyList';
 import { PropertyDetail } from './components/PropertyDetail';
+import { ContactPage } from './components/ContactPage';
 import Layout from './components/Layout';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/" element={<App />} />
               <Route path="/properties" element={<PropertyList />} />
               <Route path="/property/:id" element={<PropertyDetail />} />
+              <Route path="/contact" element={<ContactPage />} />
             </Route>
           </Routes>
         </AuthProvider>
