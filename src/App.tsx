@@ -15,7 +15,6 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { FaRobot, FaStar, FaAward, FaHome, FaComments } from 'react-icons/fa'
-import { Header } from './components/Header'
 import { useNavigate } from 'react-router-dom'
 import agentImage from './assets/agent.JPG'
 
@@ -29,62 +28,39 @@ function App() {
 
   return (
     <ChakraProvider>
-      <Header />
       <Box bgGradient={bgGradient} minH="90vh">
         <Container maxW="container.xl" py={12}>
           {/* Hero Section */}
-          <Flex direction={{ base: 'column', md: 'row' }} align="center" justify="space-between" mb={16} gap={8}>
-            <VStack align="flex-start" spacing={6} flex={1}>
-              <Badge colorScheme="teal" fontSize="md" px={3} py={1}>
-                AI-Powered Real Estate
-              </Badge>
-              <Heading size="2xl" lineHeight="shorter">
-                Welcome to the Future of
-                <Text as="span" color="teal.500"> Real Estate</Text>
-              </Heading>
-              <Text fontSize="xl" color="gray.600">
-                Experience property search reimagined through artificial intelligence,
-                bringing you closer to your dream home with cutting-edge technology.
-              </Text>
-              <HStack spacing={4}>
-                <Button
-                  colorScheme="teal"
-                  size="lg"
-                  onClick={() => navigate('/properties')}
-                >
-                  Browse Properties
-                </Button>
-                <Button
-                  variant="outline"
-                  colorScheme="teal"
-                  size="lg"
-                  onClick={() => document.getElementById('agent-section')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Meet Our Agent
-                </Button>
-              </HStack>
-            </VStack>
-            <Box
-              flex={1}
-              position="relative"
-              maxW={{ base: "300px", md: "400px" }}
-            >
-              <Icon
-                as={FaRobot}
-                position="absolute"
-                top="-20px"
-                right="-20px"
-                boxSize="40px"
-                color="teal.500"
-              />
-              <Image
-                src={agentImage}
-                alt="Kevin Zhang"
-                borderRadius="2xl"
-                shadow="2xl"
-              />
-            </Box>
-          </Flex>
+          <Box maxW="800px" mx="auto" textAlign="center" mb={16}>
+            <Badge colorScheme="teal" fontSize="md" px={3} py={1} mb={4}>
+              AI-Powered Real Estate
+            </Badge>
+            <Heading size="2xl" lineHeight="shorter" mb={4}>
+              Welcome to the Future of
+              <Text as="span" color="teal.500"> Real Estate</Text>
+            </Heading>
+            <Text fontSize="xl" color="gray.600" mb={8}>
+              Experience property search reimagined through artificial intelligence,
+              bringing you closer to your dream home with cutting-edge technology.
+            </Text>
+            <HStack spacing={4} justify="center">
+              <Button
+                colorScheme="teal"
+                size="lg"
+                onClick={() => navigate('/properties')}
+              >
+                Browse Properties
+              </Button>
+              <Button
+                variant="outline"
+                colorScheme="teal"
+                size="lg"
+                onClick={() => document.getElementById('agent-section')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Meet Our Agent
+              </Button>
+            </HStack>
+          </Box>
 
           {/* Features Section */}
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} mb={16}>

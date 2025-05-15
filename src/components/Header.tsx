@@ -24,7 +24,6 @@ export const Header = () => {
           <HStack gap={4}>
             <Button variant="ghost" onClick={() => navigate('/')}>Home</Button>
             <Button variant="ghost" onClick={() => navigate('/properties')}>Properties</Button>
-            <Button variant="ghost">About</Button>
             <Button variant="solid" colorScheme="teal" onClick={() => navigate('/contact')}>
               Contact
             </Button>

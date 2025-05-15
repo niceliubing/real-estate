@@ -6,6 +6,7 @@ import App from './App'
 import LoginForm from './components/LoginForm';
 import { PropertyList } from './components/PropertyList';
 import { PropertyDetail } from './components/PropertyDetail';
+import Layout from './components/Layout';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css'
@@ -23,10 +24,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <Router>
         <AuthProvider>
           <Routes>
-            <Route path="/login" element={<LoginForm onSuccess={() => {}} />} />
-            <Route path="/" element={<App />} />
-            <Route path="/properties" element={<PropertyList />} />
-            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route element={<Layout />}>
+              <Route path="/login" element={<LoginForm onSuccess={() => {}} />} />
+              <Route path="/" element={<App />} />
+              <Route path="/properties" element={<PropertyList />} />
+              <Route path="/property/:id" element={<PropertyDetail />} />
+            </Route>
           </Routes>
         </AuthProvider>
       </Router>
