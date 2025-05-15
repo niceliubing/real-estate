@@ -17,10 +17,9 @@ export const uploadImage = async (file: File): Promise<string> => {
     }
 
     const { imageUrl } = await response.json();
-    return imageUrl; // The server now returns the correct public path
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    throw error;
+    return imageUrl;
+  } catch {
+    throw new Error('Failed to upload image');
   }
 };
 

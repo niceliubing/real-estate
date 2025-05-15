@@ -44,7 +44,6 @@ export const loadUsers = async (): Promise<User[]> => {
       throw new Error('Failed to load users');
     }
     const csvData = await response.text();
-    console.log('Loaded CSV data:', csvData); // Debug log
 
     return new Promise((resolve) => {
       Papa.parse<Record<string, any>>(csvData, {
@@ -57,30 +56,26 @@ export const loadUsers = async (): Promise<User[]> => {
             const defaultAdmin: User = {
               id: '1',
               email: 'admin@example.com',
-              password: '123', // In a real app, this should be hashed
+              password: '123',
               name: 'Admin User',
               role: 'admin',
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             };
             users = [defaultAdmin];
-            saveUsersToCSV(users).catch(console.error);
-            resolve(users);
+            saveUsersToCSV(users).then(() => resolve(users));
             return;
           }
 
           users = results.data.map(rowToUser);
-          console.log('Parsed users:', users); // Debug log
           resolve(users);
         },
-        error: (error) => {
-          console.error('Error parsing users CSV:', error);
+        error: () => {
           resolve([]);
         }
       });
     });
-  } catch (error) {
-    console.error('Error loading users:', error);
+  } catch {
     return [];
   }
 };

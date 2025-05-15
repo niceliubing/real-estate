@@ -1,7 +1,6 @@
 import { ChakraProvider } from '@chakra-ui/react'
 import {
   Box,
-  Container,
   Heading,
   Text,
   Button,
@@ -27,9 +26,9 @@ function App() {
   )
 
   return (
-    <ChakraProvider>
-      <Box bgGradient={bgGradient} minH="90vh">
-        <Container maxW="container.xl" py={12}>
+    <>
+      <Box bgGradient={bgGradient} py={12}>
+        <Box maxW="container.xl" mx="auto" px={{ base: 4, md: 6 }}>
           {/* Hero Section */}
           <Box maxW="800px" mx="auto" textAlign="center" mb={16}>
             <Badge colorScheme="teal" fontSize="md" px={3} py={1} mb={4}>
@@ -186,9 +185,9 @@ function App() {
               Start Your Search Today
             </Button>
           </Box>
-        </Container>
+        </Box>
       </Box>
-    </ChakraProvider>
+    </>
   )
 }
 

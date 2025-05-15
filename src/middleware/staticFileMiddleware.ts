@@ -40,9 +40,7 @@ const staticFileMiddleware = () => {
         res.writeHead(404);
         res.end('File not found');
         return;
-      }
-      console.error('Error serving static file:', error);
-      next();
+      }    next();
     }
   };
 

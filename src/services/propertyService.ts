@@ -137,7 +137,6 @@ export const loadProperties = async (): Promise<Property[]> => {
 
     // Check if the response is HTML instead of CSV
     if (csvData.trim().toLowerCase().startsWith('<!doctype html>')) {
-      console.log('Received HTML instead of CSV, using default properties');
       properties = [...defaultProperties];
       await savePropertiesToCSV(properties);
       return properties;
@@ -151,20 +150,14 @@ export const loadProperties = async (): Promise<Property[]> => {
         delimiter: ',',
         transformHeader: (header: string) => header.trim(),
         complete: (results: ParseResult<Record<string, any>>) => {
-          console.log('CSV results:', results);
-          if (!results.data || !Array.isArray(results.data) || results.data.length === 0) {
-            console.log('No data found in CSV, using default properties');
-            properties = [...defaultProperties];
-            // Save default properties to CSV
-            savePropertiesToCSV(properties).catch(console.error);
-            resolve(properties);
-            return;
-          }
-
           try {
-            const loadedProperties = results.data.map(rowToProperty);
+            if (!results.data || !Array.isArray(results.data) || results.data.length === 0) {
+              properties = [...defaultProperties];
+              savePropertiesToCSV(properties).then(() => resolve(properties));
+              return;
+            }
 
-            // Ensure unique IDs
+            const loadedProperties = results.data.map(rowToProperty);
             const seenIds = new Set<string>();
             properties = loadedProperties.map((prop: Property) => {
               if (seenIds.has(prop.id)) {
@@ -175,28 +168,20 @@ export const loadProperties = async (): Promise<Property[]> => {
             });
 
             resolve(properties);
-          } catch (parseError) {
-            console.error('Error parsing CSV data:', parseError);
+          } catch {
             properties = [...defaultProperties];
-            // Save default properties to CSV
-            savePropertiesToCSV(properties).catch(console.error);
-            resolve(properties);
+            savePropertiesToCSV(properties).then(() => resolve(properties));
           }
         },
-        error: (error: Error) => {
-          console.error('Error parsing CSV:', error);
+        error: () => {
           properties = [...defaultProperties];
-          // Save default properties to CSV
-          savePropertiesToCSV(properties).catch(console.error);
-          resolve(properties);
+          savePropertiesToCSV(properties).then(() => resolve(properties));
         }
       });
     });
-  } catch (error) {
-    console.error('Error loading properties:', error);
+  } catch {
     properties = [...defaultProperties];
-    // Save default properties to CSV
-    savePropertiesToCSV(properties).catch(console.error);
+    await savePropertiesToCSV(properties);
     return properties;
   }
 };
@@ -251,10 +236,9 @@ export const saveProperty = async (property: Omit<Property, 'id' | 'createdAt' |
   try {
     await savePropertiesToCSV(properties);
     return newProperty;
-  } catch (error) {
-    console.error('Error saving to CSV:', error);
+  } catch {
     // Remove the property if API save fails
     properties = properties.slice(0, -1);
-    throw error;
+    throw new Error('Failed to save property');
   }
 };

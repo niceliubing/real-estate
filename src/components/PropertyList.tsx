@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SimpleGrid, Container, Heading, Button, Box, useToast } from '@chakra-ui/react';
+import { SimpleGrid, Box, Heading, Button, useToast } from '@chakra-ui/react';
 import { PropertyCard } from './PropertyCard';
 import { AddPropertyForm } from './AddPropertyForm';
 import { loadProperties } from '../services/propertyService';
@@ -17,10 +17,8 @@ export const PropertyList = () => {
     try {
       setIsLoading(true);
       const data = await loadProperties();
-      console.log('Loaded properties:', data); // Debug log
       setProperties(data);
-    } catch (error) {
-      console.error('Error loading properties:', error);
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to load properties. Please try refreshing the page.',
@@ -53,14 +51,14 @@ export const PropertyList = () => {
 
   if (isLoading) {
     return (
-      <Container maxW="container.xl" py={8}>
+      <Box py={8}>
         <Heading>Loading...</Heading>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
+    <Box py={8}>
       <Box display="flex" flexDirection="column" gap={8}>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Heading>Featured Properties ({properties.length})</Heading>
@@ -87,6 +85,6 @@ export const PropertyList = () => {
           </SimpleGrid>
         )}
       </Box>
-    </Container>
+    </Box>
   );
 };

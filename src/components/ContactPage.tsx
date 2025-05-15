@@ -1,6 +1,5 @@
 import {
   Box,
-  Container,
   Heading,
   Text,
   VStack,
@@ -52,7 +51,6 @@ export const ContactPage = () => {
         formRef.current.reset();
       }
     } catch (error) {
-      console.error('Error saving contact message:', error);
       toast({
         title: 'Error sending message',
         description: 'Please try again later.',
@@ -66,10 +64,10 @@ export const ContactPage = () => {
   };
 
   return (
-    <Container maxW="container.xl" py={12}>
-      <VStack spacing={12}>
+    <Box display="flex" flexDirection="column" alignItems="center" width="100%">
+      <VStack spacing={12} width="100%" align="stretch">
         {/* Contact Information Section */}
-        <Box width="100%" textAlign="center">
+        <Box textAlign="center">
           <Badge colorScheme="teal" fontSize="md" px={3} py={1} mb={4}>
             Get in Touch
           </Badge>
@@ -135,17 +133,17 @@ export const ContactPage = () => {
 
         {/* Contact Form Section */}
         <Box
-          width="100%"
-          maxW="3xl"
-          mx="auto"
           bg="white"
           p={8}
           borderRadius="xl"
           shadow="lg"
+          width="100%"
+          maxW="3xl"
+          mx="auto"
         >
           <Heading size="lg" mb={6} textAlign="center">Send us a Message</Heading>
-          <form ref={formRef} onSubmit={handleSubmit}>
-            <VStack spacing={4}>
+          <form ref={formRef} onSubmit={handleSubmit} style={{ width: '100%' }}>
+            <VStack spacing={4} width="100%">
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} width="100%">
                 <FormControl isRequired>
                   <FormLabel>First Name</FormLabel>
@@ -155,19 +153,22 @@ export const ContactPage = () => {
                   <FormLabel>Last Name</FormLabel>
                   <Input name="lastName" type="text" placeholder="Enter your last name" />
                 </FormControl>
-              </SimpleGrid>                <FormControl isRequired>
-                  <FormLabel>Email</FormLabel>
-                  <Input name="email" type="email" placeholder="Enter your email" />
-                </FormControl>                <FormControl isRequired>
-                  <FormLabel>Phone</FormLabel>
-                  <Input name="phone" type="tel" placeholder="Enter your phone number" />
-                </FormControl>                <FormControl isRequired>
-                  <FormLabel>Message</FormLabel>
-                  <Textarea
-                    name="message"
-                    placeholder="How can we help you?"
-                    rows={4}
-                  />
+              </SimpleGrid>
+              <FormControl isRequired>
+                <FormLabel>Email</FormLabel>
+                <Input name="email" type="email" placeholder="Enter your email" />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Phone</FormLabel>
+                <Input name="phone" type="tel" placeholder="Enter your phone number" />
+              </FormControl>
+              <FormControl isRequired>
+                <FormLabel>Message</FormLabel>
+                <Textarea
+                  name="message"
+                  placeholder="How can we help you?"
+                  rows={4}
+                />
               </FormControl>
               <Button
                 type="submit"
@@ -182,7 +183,7 @@ export const ContactPage = () => {
           </form>
         </Box>
       </VStack>
-    </Container>
+    </Box>
   );
 };
 

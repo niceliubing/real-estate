@@ -12,7 +12,7 @@ export const reviewDataMiddleware = () => {
       try {
         // Check if file exists
         if (!fs.existsSync(REVIEWS_FILE)) {
-          console.log('Reviews file not found, creating empty file');
+
           fs.writeFileSync(REVIEWS_FILE, 'id,propertyId,userId,userEmail,userName,isAnonymous,rating,comment,createdAt,updatedAt\n');
           res.writeHead(200, { 'Content-Type': 'text/csv' });
           res.end('');
@@ -21,7 +21,7 @@ export const reviewDataMiddleware = () => {
 
         // Read and serve the file
         const content = fs.readFileSync(REVIEWS_FILE, 'utf-8');
-        console.log('Serving reviews file content:', content); // Debug log
+
         res.writeHead(200, { 'Content-Type': 'text/csv' });
         res.end(content);
       } catch (error) {
@@ -49,7 +49,7 @@ export const reviewDataMiddleware = () => {
           throw new Error('Invalid request body format');
         }
 
-        console.log('Saving reviews:', content); // Debug log
+
         fs.writeFileSync(REVIEWS_FILE, content);
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('OK');

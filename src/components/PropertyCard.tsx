@@ -21,7 +21,6 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
     navigate(`/property/${property.id}`);
   };
 
-  console.log('PropertyCard', property);
   return (
     <Box
       maxW="sm"

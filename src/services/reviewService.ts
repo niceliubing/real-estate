@@ -45,8 +45,7 @@ export const loadReviews = async (propertyId?: string): Promise<Review[]> => {
         },
       });
     });
-  } catch (error) {
-    console.error('Error loading reviews:', error);
+  } catch {
     return [];
   }
 };
@@ -81,8 +80,7 @@ export const addReview = async (reviewData: Omit<Review, 'id' | 'createdAt' | 'u
     reviews = [...reviews, newReview];
     return newReview;
   } catch (error) {
-    console.error('Error adding review:', error);
-    throw error;
+    throw new Error('Failed to add review');
   }
 };
 

@@ -10,6 +10,7 @@ import { ContactPage } from './components/ContactPage';
 import Layout from './components/Layout';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { RecentReviews } from './components/RecentReviews';
 import './index.css'
 
 const theme = extendTheme({
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/properties" element={<PropertyList />} />
               <Route path="/property/:id" element={<PropertyDetail />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/reviews" element={<RecentReviews />} />
             </Route>
           </Routes>
         </AuthProvider>

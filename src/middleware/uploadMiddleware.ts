@@ -98,8 +98,7 @@ const uploadMiddleware = () => {
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ imageUrl: `/uploads/properties/${fileName}` }));
-    } catch (error) {
-      console.error('Error handling upload:', error);
+    } catch {
       res.writeHead(500);
       res.end(JSON.stringify({ error: 'Failed to process upload' }));
     }

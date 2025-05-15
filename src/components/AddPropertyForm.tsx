@@ -161,7 +161,6 @@ export const AddPropertyForm = ({ onPropertyAdded }: AddPropertyFormProps) => {
       // Notify parent component
       onPropertyAdded?.();
     } catch (error) {
-      console.error('Error adding property:', error);
       toast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to add property. Please try again.',

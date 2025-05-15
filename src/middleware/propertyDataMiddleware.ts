@@ -44,7 +44,6 @@ export const propertyDataMiddleware = () => {
         return;
       }
     } catch (error) {
-      console.error('Error handling property data:', error);
       res.setHeader('Content-Type', 'application/json');
       res.writeHead(500);
       res.end(JSON.stringify({ error: 'Internal server error' }));

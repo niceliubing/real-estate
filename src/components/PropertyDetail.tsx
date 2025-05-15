@@ -1,6 +1,5 @@
 import {
   Box,
-  Container,
   Image,
   Text,
   Grid,
@@ -86,23 +85,26 @@ export const PropertyDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!id) {
-        console.error('No property ID provided');
+        setIsLoading(false);
         return;
       }
 
       try {
-        console.log('Fetching data for property:', id); // Debug log
         const [properties, propertyReviews] = await Promise.all([
           loadProperties(),
           loadReviews(id)
         ]);
         const foundProperty = properties.find(p => p.id === id);
-        console.log('Found property:', foundProperty); // Debug log
-        console.log('Loaded reviews:', propertyReviews); // Debug log
         setProperty(foundProperty || null);
         setReviews(propertyReviews);
       } catch (error) {
-        console.error('Error loading data:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load property details',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        });
       } finally {
         setIsLoading(false);
       }
@@ -113,25 +115,25 @@ export const PropertyDetail = () => {
 
   if (isLoading) {
     return (
-      <Container maxW="container.xl" py={8}>
+      <Box py={8}>
         <Text>Loading...</Text>
-      </Container>
+      </Box>
     );
   }
 
   if (!property) {
     return (
-      <Container maxW="container.xl" py={8}>
+      <Box py={8}>
         <Text>Property not found</Text>
         <Button onClick={() => navigate('/properties')} mt={4}>
           Back to Properties
         </Button>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
+    <Box py={8}>
       <Button onClick={() => navigate('/properties')} mb={8}>
         Back to Properties
       </Button>
@@ -433,6 +435,6 @@ export const PropertyDetail = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </Container>
+    </Box>
   );
 };
