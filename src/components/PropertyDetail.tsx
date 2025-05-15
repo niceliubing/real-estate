@@ -266,43 +266,45 @@ export const PropertyDetail = () => {
 
               <Divider />
 
-              <Button
-                colorScheme="teal"
-                size="lg"
-                onClick={onContactOpen}
-                display="flex"
-                alignItems="center"
-                gap={2}
-                px={6}
-                py={6}
-                position="relative"
-                pl={16}
-              >
-                <Box
-                  position="absolute"
-                  left={4}
-                  borderRadius="full"
-                  overflow="hidden"
-                  width="32px"
-                  height="32px"
-                  flexShrink={0}
-                  border="2px solid white"
+              <Stack spacing={4}>
+                <Button
+                  colorScheme="teal"
+                  size="lg"
+                  onClick={onContactOpen}
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                  px={6}
+                  py={6}
+                  position="relative"
+                  pl={16}
                 >
-                  <Image
-                    src={agentImage}
-                    alt="Agent"
-                    width="100%"
-                    height="100%"
-                    objectFit="cover"
-                  />
-                </Box>
-                <Text fontSize="lg">Contact Agent</Text>
-              </Button>
-              {user?.role === 'admin' && (
-                <Button colorScheme="blue" size="lg" onClick={onEditOpen}>
-                  Edit Property
+                  <Box
+                    position="absolute"
+                    left={4}
+                    borderRadius="full"
+                    overflow="hidden"
+                    width="32px"
+                    height="32px"
+                    flexShrink={0}
+                    border="2px solid white"
+                  >
+                    <Image
+                      src={agentImage}
+                      alt="Agent"
+                      width="100%"
+                      height="100%"
+                      objectFit="cover"
+                    />
+                  </Box>
+                  <Text fontSize="lg">Contact Agent</Text>
                 </Button>
-              )}
+                {user?.role === 'admin' && (
+                  <Button colorScheme="blue" size="lg" onClick={onEditOpen}>
+                    Edit Property
+                  </Button>
+                )}
+              </Stack>
             </Stack>
           </Box>
         </GridItem>

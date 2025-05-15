@@ -24,30 +24,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<LoginForm onSuccess={() => {}} />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <App />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/properties"
-              element={
-                <ProtectedRoute>
-                  <PropertyList />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/:id"
-              element={
-                <ProtectedRoute>
-                  <PropertyDetail />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/" element={<App />} />
+            <Route path="/properties" element={<PropertyList />} />
+            <Route path="/property/:id" element={<PropertyDetail />} />
           </Routes>
         </AuthProvider>
       </Router>

@@ -9,14 +9,18 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/login" />;
+  // Only require login for admin routes
+  if (requireAdmin) {
+    if (!user) {
+      return <Navigate to="/login" />;
+    }
+
+    if (user.role !== 'admin') {
+      return <Navigate to="/" />;
+    }
   }
 
-  if (requireAdmin && user.role !== 'admin') {
-    return <Navigate to="/" />;
-  }
-
+  // Non-admin routes don't require authentication
   return <>{children}</>;
 };
 
