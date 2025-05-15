@@ -9,6 +9,9 @@ import {
   VStack,
   useToast,
   Select,
+  Text,
+  Switch,
+  Flex,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { addReview } from '../services/reviewService';
@@ -24,6 +27,8 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
   const [rating, setRating] = useState('5');
   const [comment, setComment] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const toast = useToast();
   const { user } = useAuth();
 
@@ -33,12 +38,16 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
 
     try {
       const reviewData: Omit<Review, 'id' | 'createdAt' | 'updatedAt'> = {
-        propertyId,
-        userId: user?.email || guestEmail, // Use guest email if user is not logged in
+        propertyId: String(propertyId), // Ensure propertyId is a string
+        userId: user?.email || guestEmail,
         userEmail: user?.email || guestEmail,
+        userName: user?.name || guestName,
+        isAnonymous,
         rating: parseInt(rating),
         comment,
       };
+
+      console.log('Submitting review:', reviewData); // Debug log
 
       await addReview(reviewData);
       toast({
@@ -50,6 +59,8 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
       setComment('');
       setRating('5');
       setGuestEmail('');
+      setGuestName('');
+      setIsAnonymous(false);
     } catch (error) {
       toast({
         title: 'Error',
@@ -65,16 +76,47 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
   return (
     <Box as="form" onSubmit={handleSubmit}>
       <VStack spacing={4}>
-        {!user && (
-          <FormControl isRequired>
-            <FormLabel>Your Email</FormLabel>
-            <Input
-              type="email"
-              value={guestEmail}
-              onChange={(e) => setGuestEmail(e.target.value)}
-              placeholder="Enter your email"
-            />
-          </FormControl>
+        {user ? (
+          <Flex align="center" justify="space-between" width="100%">
+            <Text>Reviewing as: {isAnonymous ? 'Anonymous' : user.name}</Text>
+            <Flex align="center" gap={2}>
+              <Text fontSize="sm">Post anonymously</Text>
+              <Switch
+                isChecked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+              />
+            </Flex>
+          </Flex>
+        ) : (
+          <>
+            <FormControl isRequired={!isAnonymous}>
+              <Flex justify="space-between" align="center" mb={2}>
+                <FormLabel mb={0}>Your Name</FormLabel>
+                <Flex align="center" gap={2}>
+                  <Text fontSize="sm">Post anonymously</Text>
+                  <Switch
+                    isChecked={isAnonymous}
+                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                  />
+                </Flex>
+              </Flex>
+              <Input
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Enter your name"
+                disabled={isAnonymous}
+              />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Your Email</FormLabel>
+              <Input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder="Enter your email"
+              />
+            </FormControl>
+          </>
         )}
         <FormControl isRequired>
           <FormLabel>Rating</FormLabel>

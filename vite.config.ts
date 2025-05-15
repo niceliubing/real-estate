@@ -5,6 +5,7 @@ import { userDataMiddleware } from './src/middleware/userDataMiddleware'
 import { propertyDataMiddleware } from './src/middleware/propertyDataMiddleware'
 import staticFileMiddleware from './src/middleware/staticFileMiddleware'
 import uploadMiddleware from './src/middleware/uploadMiddleware'
+import { reviewDataMiddleware } from './src/middleware/reviewDataMiddleware'
 import { contactDataMiddleware } from './src/middleware/contactDataMiddleware'
 import bodyParser from 'body-parser'
 
@@ -24,6 +25,7 @@ export default defineConfig({
         // Then handle API endpoints
         server.middlewares.use(userDataMiddleware());
         server.middlewares.use(propertyDataMiddleware());
+        server.middlewares.use(reviewDataMiddleware());
         server.middlewares.use(contactDataMiddleware());
       },
     }

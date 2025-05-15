@@ -85,12 +85,20 @@ export const PropertyDetail = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!id) {
+        console.error('No property ID provided');
+        return;
+      }
+
       try {
+        console.log('Fetching data for property:', id); // Debug log
         const [properties, propertyReviews] = await Promise.all([
           loadProperties(),
           loadReviews(id)
         ]);
         const foundProperty = properties.find(p => p.id === id);
+        console.log('Found property:', foundProperty); // Debug log
+        console.log('Loaded reviews:', propertyReviews); // Debug log
         setProperty(foundProperty || null);
         setReviews(propertyReviews);
       } catch (error) {

@@ -1,4 +1,4 @@
-import { Box, Text, Stack, Badge, Flex, Heading } from '@chakra-ui/react';
+import { Box, Text, Stack, Badge, Flex } from '@chakra-ui/react';
 import type { Review } from '../types/review';
 
 interface ReviewListProps {
@@ -16,6 +16,13 @@ export const ReviewList = ({ reviews }: ReviewListProps) => {
     return 'red';
   };
 
+  const getDisplayName = (review: Review) => {
+    if (review.isAnonymous) {
+      return 'Anonymous';
+    }
+    return review.userName;
+  };
+
   return (
     <Stack spacing={4}>
       {reviews.map((review) => (
@@ -27,7 +34,13 @@ export const ReviewList = ({ reviews }: ReviewListProps) => {
           bg="white"
         >
           <Flex justify="space-between" align="center" mb={2}>
-            <Text fontWeight="bold">{review.userEmail}</Text>
+            <Text fontWeight="bold">
+              {review.isAnonymous ? (
+                <Text as="span" color="gray.500">Anonymous</Text>
+              ) : (
+                getDisplayName(review)
+              )}
+            </Text>
             <Badge colorScheme={getRatingColor(review.rating)} fontSize="0.8em" px={2} py={1}>
               {review.rating} / 5
             </Badge>

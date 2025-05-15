@@ -15,29 +15,48 @@ const generateUniqueId = (existingReviews: Review[]): string => {
 // Load reviews from CSV
 export const loadReviews = async (propertyId?: string): Promise<Review[]> => {
   try {
+    console.log('Loading reviews for propertyId:', propertyId); // Debug log
     const response = await fetch('/api/reviews');
     if (!response.ok) {
       throw new Error('Failed to load reviews');
     }
     const csvData = await response.text();
+    console.log('Raw CSV data:', csvData); // Debug log
 
     return new Promise((resolve) => {
       Papa.parse(csvData, {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
+          console.log('Parsed results:', results.data); // Debug log
           reviews = results.data
-            .map((row: any): Review => ({
-              id: String(row.id),
-              propertyId: String(row.propertyId),
-              userId: String(row.userId),
-              userEmail: String(row.userEmail),
-              rating: Number(row.rating),
-              comment: String(row.comment),
-              createdAt: row.createdAt,
-              updatedAt: row.updatedAt,
-            }))
-            .filter((review: Review) => !propertyId || review.propertyId === propertyId);
+            .map((row: any): Review => {
+              const review: Review = {
+                id: String(row.id),
+                propertyId: String(row.propertyId || ''),
+                userId: String(row.userId || ''),
+                userEmail: String(row.userEmail || ''),
+                userName: String(row.userName || row.userEmail || ''),
+                isAnonymous: row.isAnonymous === 'true',
+                rating: Number(row.rating),
+                comment: String(row.comment || ''),
+                createdAt: row.createdAt,
+                updatedAt: row.updatedAt,
+              };
+              console.log('Mapped review:', review); // Debug log
+              return review;
+            })
+            .filter((review: Review) => {
+              const matches = !propertyId || review.propertyId === propertyId;
+              console.log('Review filter:', {
+                reviewPropertyId: review.propertyId,
+                requestedId: propertyId,
+                matches
+              });
+              return matches;
+            });
+
+          console.log('Filtered reviews:', reviews); // Debug log
           resolve(reviews);
         },
       });
