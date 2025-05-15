@@ -5,6 +5,8 @@ import { userDataMiddleware } from './src/middleware/userDataMiddleware'
 import { propertyDataMiddleware } from './src/middleware/propertyDataMiddleware'
 import staticFileMiddleware from './src/middleware/staticFileMiddleware'
 import uploadMiddleware from './src/middleware/uploadMiddleware'
+import { contactDataMiddleware } from './src/middleware/contactDataMiddleware'
+import bodyParser from 'body-parser'
 
 export default defineConfig({
   plugins: [
@@ -12,6 +14,9 @@ export default defineConfig({
     {
       name: 'configure-server',
       configureServer(server) {
+        // Add body parser middleware
+        server.middlewares.use(bodyParser.json());
+
         // Handle static files first
         server.middlewares.use(staticFileMiddleware());
         // Then handle image uploads
@@ -19,6 +24,7 @@ export default defineConfig({
         // Then handle API endpoints
         server.middlewares.use(userDataMiddleware());
         server.middlewares.use(propertyDataMiddleware());
+        server.middlewares.use(contactDataMiddleware());
       },
     }
   ],

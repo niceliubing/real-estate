@@ -4,7 +4,6 @@ import {
   Heading,
   Text,
   VStack,
-  HStack,
   SimpleGrid,
   FormControl,
   FormLabel,
@@ -12,34 +11,58 @@ import {
   Textarea,
   Button,
   useToast,
-  Flex,
   Icon,
   Badge
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { saveContactMessage } from '../services/contactService';
+import { type ContactMessage } from '../types/contact';
 
 export const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const formData = new FormData(e.currentTarget);
+      const messageData: Omit<ContactMessage, 'id' | 'createdAt'> = {
+        firstName: formData.get('firstName') as string,
+        lastName: formData.get('lastName') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
+        message: formData.get('message') as string,
+      };
 
-    toast({
-      title: 'Message sent!',
-      description: 'We will get back to you as soon as possible.',
-      status: 'success',
-      duration: 5000,
-      isClosable: true,
-    });
+      await saveContactMessage(messageData);
 
-    setIsSubmitting(false);
-    (e.target as HTMLFormElement).reset();
+      toast({
+        title: 'Message sent!',
+        description: 'We will get back to you as soon as possible.',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      });
+
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+    } catch (error) {
+      console.error('Error saving contact message:', error);
+      toast({
+        title: 'Error sending message',
+        description: 'Please try again later.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -121,32 +144,30 @@ export const ContactPage = () => {
           shadow="lg"
         >
           <Heading size="lg" mb={6} textAlign="center">Send us a Message</Heading>
-          <form onSubmit={handleSubmit}>
+          <form ref={formRef} onSubmit={handleSubmit}>
             <VStack spacing={4}>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} width="100%">
                 <FormControl isRequired>
                   <FormLabel>First Name</FormLabel>
-                  <Input type="text" placeholder="Enter your first name" />
+                  <Input name="firstName" type="text" placeholder="Enter your first name" />
                 </FormControl>
                 <FormControl isRequired>
                   <FormLabel>Last Name</FormLabel>
-                  <Input type="text" placeholder="Enter your last name" />
+                  <Input name="lastName" type="text" placeholder="Enter your last name" />
                 </FormControl>
-              </SimpleGrid>
-              <FormControl isRequired>
-                <FormLabel>Email</FormLabel>
-                <Input type="email" placeholder="Enter your email" />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Phone</FormLabel>
-                <Input type="tel" placeholder="Enter your phone number" />
-              </FormControl>
-              <FormControl isRequired>
-                <FormLabel>Message</FormLabel>
-                <Textarea
-                  placeholder="How can we help you?"
-                  rows={4}
-                />
+              </SimpleGrid>                <FormControl isRequired>
+                  <FormLabel>Email</FormLabel>
+                  <Input name="email" type="email" placeholder="Enter your email" />
+                </FormControl>                <FormControl isRequired>
+                  <FormLabel>Phone</FormLabel>
+                  <Input name="phone" type="tel" placeholder="Enter your phone number" />
+                </FormControl>                <FormControl isRequired>
+                  <FormLabel>Message</FormLabel>
+                  <Textarea
+                    name="message"
+                    placeholder="How can we help you?"
+                    rows={4}
+                  />
               </FormControl>
               <Button
                 type="submit"
