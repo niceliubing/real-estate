@@ -30,15 +30,11 @@ function App() {
       <Box bgGradient={bgGradient} py={12}>
         <Box maxW="container.xl" mx="auto" px={{ base: 4, md: 6 }}>
           {/* Hero Section */}
-          <Box maxW="800px" mx="auto" textAlign="center" mb={16}>
-            <Badge colorScheme="teal" fontSize="md" px={3} py={1} mb={4}>
-              AI-Powered Real Estate
-            </Badge>
-            <Heading size="2xl" lineHeight="shorter" mb={4}>
-              Welcome to the Future of
-              <Text as="span" color="teal.500"> Real Estate</Text>
+          <Box maxW="900px" mx="auto" textAlign="center" mb={16}>
+            <Heading size="2xl" lineHeight="shorter" mb={4} whiteSpace="nowrap">
+              Welcome to the Future of <Text as="span" color="teal.500" display="inline">Real Estate</Text>
             </Heading>
-            <Text fontSize="xl" color="gray.600" mb={8}>
+            <Text fontSize="xl" color="gray.600" mb={8} maxW="800px" mx="auto">
               Experience property search reimagined through artificial intelligence,
               bringing you closer to your dream home with cutting-edge technology.
             </Text>

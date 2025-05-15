@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Button, HStack, Image } from '@chakra-ui/react';
+import { Box, Flex, Button, HStack, Image, Badge } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import agentImage from '../assets/agent.JPG';
@@ -52,9 +52,9 @@ export const Header = () => {
               objectFit="cover"
             />
           </Box>
-          <Heading size="lg" color="teal.500">
-            Real Estate
-          </Heading>
+          <Badge colorScheme="teal" fontSize="md" px={3} py={1} bg="transparent" border="none">
+            AI-Powered Real Estate
+          </Badge>
         </Flex>
 
         <HStack spacing={4}>
