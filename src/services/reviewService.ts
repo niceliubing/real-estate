@@ -15,48 +15,32 @@ const generateUniqueId = (existingReviews: Review[]): string => {
 // Load reviews from CSV
 export const loadReviews = async (propertyId?: string): Promise<Review[]> => {
   try {
-    console.log('Loading reviews for propertyId:', propertyId); // Debug log
     const response = await fetch('/api/reviews');
     if (!response.ok) {
       throw new Error('Failed to load reviews');
     }
     const csvData = await response.text();
-    console.log('Raw CSV data:', csvData); // Debug log
 
     return new Promise((resolve) => {
       Papa.parse(csvData, {
         header: true,
         skipEmptyLines: true,
         complete: (results) => {
-          console.log('Parsed results:', results.data); // Debug log
           reviews = results.data
-            .map((row: any): Review => {
-              const review: Review = {
-                id: String(row.id),
-                propertyId: String(row.propertyId || ''),
-                userId: String(row.userId || ''),
-                userEmail: String(row.userEmail || ''),
-                userName: String(row.userName || row.userEmail || ''),
-                isAnonymous: row.isAnonymous === 'true',
-                rating: Number(row.rating),
-                comment: String(row.comment || ''),
-                createdAt: row.createdAt,
-                updatedAt: row.updatedAt,
-              };
-              console.log('Mapped review:', review); // Debug log
-              return review;
-            })
-            .filter((review: Review) => {
-              const matches = !propertyId || review.propertyId === propertyId;
-              console.log('Review filter:', {
-                reviewPropertyId: review.propertyId,
-                requestedId: propertyId,
-                matches
-              });
-              return matches;
-            });
+            .map((row: any): Review => ({
+              id: String(row.id),
+              propertyId: String(row.propertyId || ''),
+              userId: String(row.userId || ''),
+              userEmail: String(row.userEmail || ''),
+              userName: String(row.userName || row.userEmail || ''),
+              isAnonymous: row.isAnonymous === 'true',
+              rating: Number(row.rating),
+              comment: String(row.comment || ''),
+              createdAt: row.createdAt || new Date().toISOString(),
+              updatedAt: row.updatedAt || new Date().toISOString(),
+            }))
+            .filter((review: Review) => !propertyId || review.propertyId === propertyId);
 
-          console.log('Filtered reviews:', reviews); // Debug log
           resolve(reviews);
         },
       });
@@ -67,64 +51,73 @@ export const loadReviews = async (propertyId?: string): Promise<Review[]> => {
   }
 };
 
-// Save reviews to CSV
-const saveReviewsToCSV = async (reviewsToSave: Review[]) => {
-  const csv = Papa.unparse(reviewsToSave);
-  const response = await fetch('/api/reviews', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/csv'
-    },
-    body: csv
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to save reviews');
-  }
-};
-
 // Add a new review
-export const addReview = async (review: Omit<Review, 'id' | 'createdAt' | 'updatedAt'>): Promise<Review> => {
-  const newReview: Review = {
-    ...review,
-    id: generateUniqueId(reviews),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+export const addReview = async (reviewData: Omit<Review, 'id' | 'createdAt' | 'updatedAt'>): Promise<Review> => {
+  try {
+    // Load existing reviews to get the latest state
+    await loadReviews();
 
-  reviews = [...reviews, newReview];
-  await saveReviewsToCSV(reviews);
-  return newReview;
+    const newReview: Review = {
+      ...reviewData,
+      id: generateUniqueId(reviews),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Send the new review to the server
+    const response = await fetch('/api/reviews', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newReview),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save review');
+    }
+
+    // Update local cache
+    reviews = [...reviews, newReview];
+    return newReview;
+  } catch (error) {
+    console.error('Error adding review:', error);
+    throw error;
+  }
 };
 
 // Update a review
 export const updateReview = async (review: Review): Promise<Review> => {
-  const index = reviews.findIndex(r => r.id === review.id);
+  const index = reviews.findIndex((r) => r.id === review.id);
   if (index === -1) {
     throw new Error('Review not found');
   }
 
-  const updatedReview = {
-    ...review,
-    updatedAt: new Date().toISOString(),
-  };
-
+  const updatedReview = { ...review, updatedAt: new Date().toISOString() };
   reviews[index] = updatedReview;
-  await saveReviewsToCSV(reviews);
+
+  // Send the update to the server
+  const response = await fetch('/api/reviews', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updatedReview),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update review');
+  }
+
   return updatedReview;
 };
 
-// Delete a review
-export const deleteReview = async (reviewId: string): Promise<void> => {
-  reviews = reviews.filter(r => r.id !== reviewId);
-  await saveReviewsToCSV(reviews);
-};
-
-// Get average rating for a property
+// Helper function to get the average rating for a property
 export const getAverageRating = (propertyId: string): number => {
-  const propertyReviews = reviews.filter(r => r.propertyId === propertyId);
-  if (propertyReviews.length === 0) return 0;
-
+  const propertyReviews = reviews.filter(review => review.propertyId === propertyId);
+  if (propertyReviews.length === 0) {
+    return 0;
+  }
   const sum = propertyReviews.reduce((acc, review) => acc + review.rating, 0);
   return sum / propertyReviews.length;
 };

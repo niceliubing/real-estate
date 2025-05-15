@@ -320,7 +320,6 @@ export const PropertyDetail = () => {
 
       {/* Reviews Section */}
       <Box mt={12}>
-        <Heading size="lg" mb={6}>Reviews</Heading>
         <Stack spacing={6}>
           {reviews.length > 0 ? (
             <Box>

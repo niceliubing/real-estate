@@ -1,5 +1,6 @@
-import { Box, Text, Stack, Badge, Flex } from '@chakra-ui/react';
+import { Box, Text, Stack, Flex, Avatar } from '@chakra-ui/react';
 import type { Review } from '../types/review';
+import { StarRating } from './StarRating';
 
 interface ReviewListProps {
   reviews: Review[];
@@ -10,17 +11,32 @@ export const ReviewList = ({ reviews }: ReviewListProps) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getRatingColor = (rating: number) => {
-    if (rating >= 4) return 'green';
-    if (rating >= 3) return 'yellow';
-    return 'red';
-  };
-
   const getDisplayName = (review: Review) => {
     if (review.isAnonymous) {
       return 'Anonymous';
     }
     return review.userName;
+  };
+
+  // Get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Get consistent color based on user ID/email
+  const getUserColor = (review: Review) => {
+    if (review.isAnonymous) return 'gray.500';
+
+    const colors = ['teal', 'blue', 'purple', 'cyan', 'pink', 'orange'];
+    const hash = review.userId.split('').reduce((acc, char) => {
+      return char.charCodeAt(0) + ((acc << 5) - acc);
+    }, 0);
+    return `${colors[Math.abs(hash) % colors.length]}.500`;
   };
 
   return (
@@ -34,16 +50,25 @@ export const ReviewList = ({ reviews }: ReviewListProps) => {
           bg="white"
         >
           <Flex justify="space-between" align="center" mb={2}>
-            <Text fontWeight="bold">
-              {review.isAnonymous ? (
-                <Text as="span" color="gray.500">Anonymous</Text>
-              ) : (
-                getDisplayName(review)
-              )}
-            </Text>
-            <Badge colorScheme={getRatingColor(review.rating)} fontSize="0.8em" px={2} py={1}>
-              {review.rating} / 5
-            </Badge>
+            <Flex align="center" gap={2}>
+              <Avatar
+                size="xs"
+                name={review.isAnonymous ? 'Anonymous' : review.userName}
+                bg={getUserColor(review)}
+                color="white"
+                src=""
+              >
+                {getInitials(getDisplayName(review))}
+              </Avatar>
+              <Text fontWeight="bold">
+                {review.isAnonymous ? (
+                  <Text as="span" color="gray.500">Anonymous</Text>
+                ) : (
+                  getDisplayName(review)
+                )}
+              </Text>
+            </Flex>
+            <StarRating rating={review.rating} readonly />
           </Flex>
           <Text mb={2}>{review.comment}</Text>
           <Text fontSize="sm" color="gray.500">

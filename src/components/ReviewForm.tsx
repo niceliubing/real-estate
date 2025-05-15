@@ -8,7 +8,6 @@ import {
   Textarea,
   VStack,
   useToast,
-  Select,
   Text,
   Switch,
   Flex,
@@ -16,6 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { addReview } from '../services/reviewService';
 import type { Review } from '../types/review';
+import { StarRating } from './StarRating';
 
 interface ReviewFormProps {
   propertyId: string;
@@ -24,7 +24,7 @@ interface ReviewFormProps {
 
 export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [rating, setRating] = useState('5');
+  const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestName, setGuestName] = useState('');
@@ -38,16 +38,14 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
 
     try {
       const reviewData: Omit<Review, 'id' | 'createdAt' | 'updatedAt'> = {
-        propertyId: String(propertyId), // Ensure propertyId is a string
+        propertyId: String(propertyId),
         userId: user?.email || guestEmail,
         userEmail: user?.email || guestEmail,
         userName: user?.name || guestName,
         isAnonymous,
-        rating: parseInt(rating),
+        rating,
         comment,
       };
-
-      console.log('Submitting review:', reviewData); // Debug log
 
       await addReview(reviewData);
       toast({
@@ -57,7 +55,7 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
       });
       onReviewAdded();
       setComment('');
-      setRating('5');
+      setRating(5);
       setGuestEmail('');
       setGuestName('');
       setIsAnonymous(false);
@@ -119,17 +117,10 @@ export const ReviewForm = ({ propertyId, onReviewAdded }: ReviewFormProps) => {
           </>
         )}
         <FormControl isRequired>
-          <FormLabel>Rating</FormLabel>
-          <Select
-            value={rating}
-            onChange={(e) => setRating(e.target.value)}
-          >
-            <option value="5">5 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="2">2 Stars</option>
-            <option value="1">1 Star</option>
-          </Select>
+          <Flex align="center" gap={3}>
+            <FormLabel mb={0}>Rating</FormLabel>
+            <StarRating rating={rating} onRatingChange={setRating} />
+          </Flex>
         </FormControl>
         <FormControl isRequired>
           <FormLabel>Comment</FormLabel>
