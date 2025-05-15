@@ -94,12 +94,19 @@ export const ContactPage = () => {
             spacing={4}
             align="center"
           >
-            <Icon as={FaMapMarkerAlt} boxSize="6" color="teal.500" />
-            <Text fontWeight="bold">Visit Us</Text>
-            <Text color="gray.600">Oakville Office</Text>
-            <Text color="gray.600">1660 North Service Rd E unit 103</Text>
-            <Text color="gray.600">Oakville, ON L6H 7G3</Text>
-            <Text color="gray.500" fontSize="sm">By appointment only</Text>
+            <VStack
+              as="a"
+              href="https://www.google.com/maps/search/?api=1&query=1660+North+Service+Rd+E+unit+103+Oakville+ON+L6H+7G3"
+              target="_blank"
+              rel="noopener noreferrer"
+              cursor="pointer"
+              _hover={{ opacity: 0.8 }}
+            >
+              <Icon as={FaMapMarkerAlt} boxSize="6" color="teal.500" />
+              <Text fontWeight="bold">Visit Us</Text>
+              <Text color="gray.600">Oakville Office</Text>
+              <Text color="gray.500" fontSize="sm">By appointment only</Text>
+            </VStack>
           </VStack>
         </SimpleGrid>
 

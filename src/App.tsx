@@ -102,11 +102,11 @@ function App() {
               </Box>
               <VStack align="flex-start" flex={1.5} spacing={4}>
                 <Badge colorScheme="teal" fontSize="md" px={3} py={1}>
-                  #1 Bay Area Realtor
+                  #1 GTA Area Realtor
                 </Badge>
                 <Heading size="xl">Kevin Zhang</Heading>
                 <Text fontSize="lg" color="gray.700">
-                  With over a decade of experience in the Bay Area real estate market, Kevin Zhang has consistently ranked as the #1 realtor in the region. His innovative approach combines traditional expertise with cutting-edge AI technology to provide unparalleled service to his clients.
+                  With over a decade of experience in the greater Toronto area real estate market, Kevin Zhang has consistently ranked as the #1 realtor in the region. His innovative approach combines traditional expertise with cutting-edge AI technology to provide unparalleled service to his clients.
                 </Text>
                 <HStack spacing={4}>
                   <VStack align="flex-start">

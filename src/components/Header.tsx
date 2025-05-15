@@ -1,6 +1,7 @@
-import { Box, Container, Flex, Heading, Button, HStack } from '@chakra-ui/react';
+import { Box, Container, Flex, Heading, Button, HStack, Image } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import agentImage from '../assets/agent.JPG';
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -18,9 +19,27 @@ export const Header = () => {
     <Box as="header" bg="white" boxShadow="sm">
       <Container maxW="container.xl" py={4}>
         <Flex justify="space-between" align="center">
-          <Heading size="lg" color="teal.500" cursor="pointer" onClick={() => navigate('/')}>
-            Real Estate
-          </Heading>
+          <Flex align="center" gap={3} cursor="pointer" onClick={() => navigate('/')}>
+            <Box
+              width="40px"
+              height="40px"
+              borderRadius="full"
+              overflow="hidden"
+              border="2px solid"
+              borderColor="teal.500"
+            >
+              <Image
+                src={agentImage}
+                alt="Kevin Zhang"
+                width="100%"
+                height="100%"
+                objectFit="cover"
+              />
+            </Box>
+            <Heading size="lg" color="teal.500">
+              Real Estate
+            </Heading>
+          </Flex>
           <HStack gap={4}>
             <Button variant="ghost" onClick={() => navigate('/')}>Home</Button>
             <Button variant="ghost" onClick={() => navigate('/properties')}>Properties</Button>
